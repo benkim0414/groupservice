@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+package kordevaus;
+
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "pb";
+
+message Group {
+  // The unique ID of a group. 
+  string id = 1;
+
+  // The group's display name.
+  string name = 2;
+
+  // The group's email address.
+  string email = 3;
+
+  // An extended description to help users determine the purpose of a group.
+  string description = 4;
+}
+
+message Member {
+  // The unique ID of the group member.
+  string id = 1;
+
+  // The member's email address.
+  string email = 2;
+
+  // Status of member. Acceptable values are:
+  // "ACTIVE"
+  // "ARCHIVED"
+  // "SUSPENDED"
+  // "UNKNOWN"
+  string status = 3;
+}
+
+service GroupService {
+  option (google.api.default_host) = "localhost:50051";
+
+  // Retrieve all groups.
+  rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse) {
+    option (google.api.http) = {
+      get: "/v1/groups"
+    };
+  }
+
+  // Retrieves a group's properties.
+  rpc GetGroup(GetGroupRequest) returns (Group) {
+    option (google.api.http) = {
+      get: "/v1/{name=groups/*}"
+    };
+  }
+
+  // Creates a group.
+  rpc CreateGroup(CreateGroupRequest) returns (Group) {
+    option (google.api.http) = {
+      post: "/v1/groups"
+      body: "group"
+    };
+  }
+
+  // Deletes a group.
+  rpc DeleteGroup(DeleteGroupRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=groups/*}"
+    };
+  }
+
+  // Retrieves a paginated list of all members in a group.
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse) {
+    option (google.api.http) = {
+      get: "/v1/{parent=groups/*}/members"
+    };
+  }
+
+  // Retrieves a group member's properties.
+  rpc GetMember(GetMemberRequest) returns (Member) {
+    option (google.api.http) = {
+      get: "/v1/{name=groups/*/members/*}"
+    };
+  }
+
+  // Adds a user to the specified group.
+  rpc CreateMember(CreateMemberRequest) returns (Member) {
+    option (google.api.http) = {
+      post: "/v1/{parent=groups/*}/members"
+      body: "member"
+    };
+  }
+
+  // Removes a member from a group.
+  rpc DeleteMember(DeleteMemberRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/{name=groups/*/members/*}"
+    };
+  }
+}
+
+message ListGroupsRequest {
+  // Maximum number of results to return. Acceptable values are 1 to 200, inclusive.
+  int32 page_size = 1;
+
+  // Token to specify next page in the list.
+  string page_token = 2;
+}
+
+message ListGroupsResponse {
+  // List of group objects.
+  repeated Group groups = 1;
+
+  // Token used to access next page of this result.
+  string next_page_token = 2;
+}
+
+message GetGroupRequest {
+  // The field will contain name of the resource requested.
+  string name = 1;
+}
+
+message CreateGroupRequest {
+  // The group to create.
+  Group group = 1;
+}
+
+message DeleteGroupRequest {
+  // The resource name of the group to be deleted.
+  string name = 1;
+}
+
+message ListMembersRequest {
+  // The parent resource name.
+  string parent = 1;
+
+  // Maximum number of results to return. Acceptable values are 1 to 200, inclusive.
+  int32 page_size = 2;
+
+  // Token to specify the next page in the list.
+  string page_token = 3;
+}
+
+message ListMembersResponse {
+  // List of member objects.
+  repeated Member members = 1;
+
+  // Token used to access next page of this result.
+  string next_page_token = 2;
+}
+
+message GetMemberRequest {
+  // The field will contain name of the resource requested.
+  string name = 1;
+}
+
+message CreateMemberRequest {
+  // The parent resource name where the member is to be created.
+  string parent = 1;
+
+  // The member to create.
+  Member member = 2;
+}
+
+message DeleteMemberRequest {
+  // The resource name of the member to be deleted.
+  string name = 1;
+}
